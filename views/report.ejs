@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title><%= reportTitle %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body.container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    @media print {
+      @page {
+        size: landscape;
+      }
+      .no-print {
+        display: none !important;
+      }
+      body {
+        margin: 1in;
+      }
+      table {
+        width: 100% !important;
+        border-collapse: collapse;
+      }
+    }
+  </style>
+</head>
+<body class="container mt-5">
+  <!-- Title is always visible -->
+  <h2 class="mb-3"><%= reportTitle %></h2>
+
+  <!-- Buttons hidden on print -->
+  <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <button class="btn btn-success" onclick="window.print()">Print</button>
+    <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+
+  <table class="table table-bordered table-striped">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Sex</th>
+        <th>Status</th>
+        <th>Position</th>
+        <th>Education</th>
+        <th>Email</th>
+        <th>Contact</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% employees.forEach((emp, index) => { %>
+      <tr>
+        <td><%= index + 1 %></td>
+        <td><%= emp.name %></td>
+        <td><%= emp.sex %></td>
+        <td><%= emp.status_of_appointment %></td>
+        <td><%= emp.position %></td>
+        <td><%= emp.educational_background %></td>
+        <td><%= emp.email %></td>
+        <td><%= emp.contact_number %></td>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

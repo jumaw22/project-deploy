@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Employee Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .chart-container { width: 220px; margin: auto; }
+    .dashboard-wrapper { display: flex; gap: 20px; }
+    .charts-column { display: flex; flex-direction: column; align-items: center; }
+    canvas { max-width: 200px; max-height: 200px; }
+
+    .btn-primary {
+      background-color: #147452;
+      border-color: #147452;
+    }
+
+    .btn-primary:hover {
+      background-color: #0f5a40;
+      border-color: #0f5a40;
+    }
+
+    .btn-success {
+      background-color: #28a745;
+      border-color: #28a745;
+    }
+
+    .btn-success:hover {
+      background-color: #218838;
+      border-color: #218838;
+    }
+
+    .btn-info {
+      background-color: 	#097969;
+      border-color: 	#097969;
+      color: #ffffff;
+    }
+
+    .btn-info:hover {
+      background-color: #5dc587;
+      border-color: #5dc587;
+      color: #ffffff;
+    }
+
+    .table thead {
+      background-color: #147452;
+      color: white;
+    }
+
+    .pagination {
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .pagination li {
+      cursor: pointer;
+    }
+    .pagination li.disabled a {
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body class="p-4">
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Employee Dashboard</h2>
+  <a href="/logout" class="btn btn-secondary">Logout</a>
+</div>
+
+<form action="/dashboard" method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    <input type="text" name="term" class="form-control" placeholder="Search name or position" value="<%= term %>">
+  </div>
+  <div class="col-auto">
+    <select name="statusFilter" class="form-select">
+      <option <%= statusFilter === 'All' ? 'selected' : '' %>>All</option>
+      <% statusOptions.forEach(opt => { %>
+        <option value="<%= opt %>" <%= statusFilter === opt ? 'selected' : '' %>><%= opt %></option>
+      <% }) %>
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
+
+<a href="/add" class="btn btn-success mb-3">Add New Employee</a>
+<a href="/report?statusFilter=<%= statusFilter %>" class="btn btn-info mb-3 ms-2">Print Report</a>
+<p><strong>Results:</strong> <%= employeeCount %></p>
+
+<div class="dashboard-wrapper">
+  <div class="charts-column">
+    <div class="chart-container mb-4">
+      <canvas id="sexChart"></canvas>
+      <p class="text-center fw-bold mt-2">Gender</p>
+    </div>
+    <div class="chart-container">
+      <canvas id="statusChart"></canvas>
+      <p class="text-center fw-bold mt-2">Status</p>
+    </div>
+  </div>
+
+  <div class="flex-grow-1">
+    <% if (employees.length === 0) { %>
+      <div class="alert alert-warning">No employees found.</div>
+    <% } else { %>
+      <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th>Name</th>
+            <th>Sex</th>
+            <th>Status</th>
+            <th>Position</th>
+            <th>Education</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="employeeTableBody">
+          <% employees.forEach(emp => { %>
+            <tr>
+              <td><%= emp.name %></td>
+              <td><%= emp.sex %></td>
+              <td><%= emp.status_of_appointment %></td>
+              <td><%= emp.position %></td>
+              <td><%= emp.educational_background %></td>
+              <td><%= emp.email %></td>
+              <td><%= emp.contact_number %></td>
+              <td>
+                <a href="/edit/<%= emp.id %>" class="btn btn-sm btn-primary">Edit</a>
+                <a href="/delete/<%= emp.id %>" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this employee?')">Delete</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <!-- Pagination Controls -->
+      <nav>
+        <ul class="pagination" id="pagination"></ul>
+      </nav>
+    <% } %>
+  </div>
+</div>
+
+<script>
+  const sexData = <%- JSON.stringify(sexData) %>;
+  const statusData = <%- JSON.stringify(statusData) %>;
+
+  new Chart(document.getElementById('sexChart'), {
+    type: 'pie',
+    data: {
+      labels: sexData.map(i => i._id),
+      datasets: [{ data: sexData.map(i => i.count), backgroundColor: ['#36A2EB', '#FF6384'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, responsive: false }
+  });
+
+  new Chart(document.getElementById('statusChart'), {
+    type: 'pie',
+    data: {
+      labels: statusData.map(i => i._id),
+      datasets: [{ data: statusData.map(i => i.count), backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'] }]
+    },
+    options: { plugins: { legend: { position: 'bottom' } }, responsive: false }
+  });
+
+  // Pagination settings
+  const rowsPerPage = 10;
+  let currentPage = 1;
+
+  const tableBody = document.getElementById('employeeTableBody');
+  const rows = tableBody.getElementsByTagName('tr');
+  const totalRows = rows.length;
+  const totalPages = Math.ceil(totalRows / rowsPerPage);
+  const pagination = document.getElementById('pagination');
+
+  function showPage(page) {
+    currentPage = page;
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+
+    for (let i = 0; i < totalRows; i++) {
+      rows[i].style.display = (i >= start && i < end) ? '' : 'none';
+    }
+    updatePagination();
+  }
+
+  function updatePagination() {
+    pagination.innerHTML = '';
+
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+    prevLi.innerHTML = `<a class="page-link" href="#">Previous</a>`;
+    prevLi.addEventListener('click', function(e) {
+      e.preventDefault();
+      if(currentPage > 1) showPage(currentPage - 1);
+    });
+    pagination.appendChild(prevLi);
+
+    // Numbered pages
+    for(let i = 1; i <= totalPages; i++) {
+      const li = document.createElement('li');
+      li.className = 'page-item' + (i === currentPage ? ' active' : '');
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.addEventListener('click', function(e) {
+        e.preventDefault();
+        showPage(i);
+      });
+      pagination.appendChild(li);
+    }
+
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
+    nextLi.innerHTML = `<a class="page-link" href="#">Next</a>`;
+    nextLi.addEventListener('click', function(e) {
+      e.preventDefault();
+      if(currentPage < totalPages) showPage(currentPage + 1);
+    });
+    pagination.appendChild(nextLi);
+  }
+
+  // Initialize
+  showPage(1);
+</script>
+
+</body>
+</html>

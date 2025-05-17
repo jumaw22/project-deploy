@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #d0fbe4, #fefee5, #b6f7c3);
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    .logo-text {
+      text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #147452;
+  margin-bottom: 15px;
+  cursor: none !important;
+  pointer-events: none; /* Disable any interactivity */
+    }
+
+    .login-wrapper {
+      min-width: 250px;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-custom {
+      background-color: #147452;
+      border-color: #147452;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .btn-custom:hover {
+      background-color: #0f5a40;
+      border-color: #0f5a40;
+      color: #ffffff;
+    }
+
+  </style>
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100">
+
+  <div class="login-wrapper">
+    <!-- Logo Text as heading -->
+    <h2 class="logo-text">Log In</h2>
+
+    <% if (error) { %>
+      <div class="alert alert-danger"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/login">
+      <div class="mb-3">
+        <input type="text" name="username" class="form-control" placeholder="Username" required>
+      </div>
+      <div class="mb-3">
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
+      </div>
+      <button type="submit" class="btn btn-custom w-100">Login</button>
+    </form>
+
+  </div>
+</body>
+</html>

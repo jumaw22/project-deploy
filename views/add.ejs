@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Employee</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body, html {
+      height: 100%;
+    }
+    .center-wrapper {
+      height: 100%;
+    }
+    .form-container {
+      max-width: 500px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body class="d-flex align-items-center justify-content-center center-wrapper">
+
+  <form action="/add" method="POST" onsubmit="capitalizeInputs()" class="form-container p-4 border rounded bg-white shadow">
+    <h2 class="mb-4 text-center">Add New Employee</h2>
+
+    <div class="mb-3">
+      <label>Name</label>
+      <input type="text" id="name" name="name" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Sex</label>
+      <select name="sex" class="form-control" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label>Status</label>
+      <select name="status_of_appointment" class="form-control" required>
+        <option value="JO">JO</option>
+        <option value="COS">COS</option>
+        <option value="Permanent">Permanent</option>
+        <option value="Retired">Retired</option>
+        <option value="Temporary">Temporary</option>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label>Position</label>
+      <input type="text" id="position" name="position" class="form-control" required>
+    </div>
+    <div class="mb-3">
+      <label>Education</label>
+      <input type="text" id="educational_background" name="educational_background" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control">
+    </div>
+    <div class="mb-3">
+      <label>Contact</label>
+      <input type="text" name="contact_number" class="form-control">
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <button type="submit" class="btn btn-success">Add Employee</button>
+      <a href="/dashboard" class="btn btn-secondary">Back</a>
+    </div>
+  </form>
+
+  <script>
+    function toTitleCase(str) {
+      return str.replace(/\w\S*/g, function(txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
+    }
+
+    function capitalizeInputs() {
+      const fields = ['name', 'position', 'educational_background'];
+      fields.forEach(id => {
+        const input = document.getElementById(id);
+        if (input && input.value) input.value = toTitleCase(input.value);
+      });
+    }
+  </script>
+</body>
+</html>
