@@ -1,7 +1,8 @@
 // server.js (MongoDB version with Bootstrap UI)
 const express = require('express');
-const session = require('express-session');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const path = require('path');
@@ -13,14 +14,32 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,})
     .then(() => console.log("User Service: MongoDB Connected"))
     .catch(err => console.error(err));
+  
+app.use(session({
+  secret: 'randomhaha',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+  }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+  },
+}));
 
 const UserSchema = new mongoose.Schema({
   username: String,
   password: String
 });
+
+
+
 const EmployeeSchema = new mongoose.Schema({
   name: String,
   sex: String,
